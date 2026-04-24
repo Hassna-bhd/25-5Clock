@@ -45,17 +45,73 @@
       };
 
       return (
-        <div>
-          <h1>25 + 5 Clock</h1>
+        return (
+  <div className="App">
 
-          <h2 id="timer-label">Session</h2>
+    <h1>25 + 5 Clock</h1>
 
-          <div id="time-left">{format(timeLeft)}</div>
+    <div className="length-container">
 
-          <button id="start_stop" onClick={() => setIsRunning(!isRunning)}>
-            {isRunning ? "Pause" : "Start"}
-          </button>
-        </div>
+      {/* BREAK */}
+      <div>
+        <h2 id="break-label">Break Length</h2>
+
+        <button id="break-decrement" onClick={() => setBreakLength(p => Math.max(1, p - 1))}>
+          <i className="fas fa-arrow-down"></i>
+        </button>
+
+        <span id="break-length">{breakLength}</span>
+
+        <button id="break-increment" onClick={() => setBreakLength(p => Math.min(60, p + 1))}>
+          <i className="fas fa-arrow-up"></i>
+        </button>
+      </div>
+
+      {/* SESSION */}
+      <div>
+        <h2 id="session-label">Session Length</h2>
+
+        <button id="session-decrement" onClick={() => setSessionLength(p => Math.max(1, p - 1))}>
+          <i className="fas fa-arrow-down"></i>
+        </button>
+
+        <span id="session-length">{sessionLength}</span>
+
+        <button id="session-increment" onClick={() => setSessionLength(p => Math.min(60, p + 1))}>
+          <i className="fas fa-arrow-up"></i>
+        </button>
+      </div>
+
+    </div>
+
+    {/* TIMER */}
+    <div className="timer-box">
+      <h2 id="timer-label">{mode}</h2>
+      <div id="time-left">{format(timeLeft)}</div>
+    </div>
+
+    {/* CONTROLS */}
+    <div className="controls">
+
+      <button id="start_stop" onClick={() => setIsRunning(!isRunning)}>
+        <i className={isRunning ? "fas fa-pause" : "fas fa-play"}></i>
+      </button>
+
+      <button id="reset" onClick={reset}>
+        <i className="fas fa-sync-alt"></i>
+      </button>
+
+    </div>
+
+    {/* AUDIO */}
+    <audio
+      id="beep"
+      ref={audioRef}
+      src="https://cdn.freecodecamp.org/testable-projects-fcc/audio/BeepSound.wav"
+    />
+
+  </div>
+);
       );
     }
 
