@@ -22,98 +22,128 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+   const { useState, useEffect, useRef } = React;
 
-    function App() {
-      const [timeLeft, setTimeLeft] = useState(1500);
-      const [isRunning, setIsRunning] = useState(false);
+function App() {
+  const [breakLength, setBreakLength] = useState(5);
+  const [sessionLength, setSessionLength] = useState(25);
+  const [timeLeft, setTimeLeft] = useState(1500);
+  const [isRunning, setIsRunning] = useState(false);
+  const [mode, setMode] = useState("Session");
 
-      useEffect(() => {
-        if (!isRunning) return;
+  const audioRef = useRef(null);
 
-        const interval = setInterval(() => {
-          setTimeLeft(prev => (prev > 0 ? prev - 1 : 0));
-        }, 1000);
+  useEffect(() => {
+    if (!isRunning) return;
 
-        return () => clearInterval(interval);
-      }, [isRunning]);
+    const interval = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev === 0) {
+          audioRef.current?.play();
 
-      const format = (t) => {
-        const m = Math.floor(t / 60);
-        const s = t % 60;
-        return `${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`;
-      };
+          if (mode === "Session") {
+            setMode("Break");
+            return breakLength * 60;
+          } else {
+            setMode("Session");
+            return sessionLength * 60;
+          }
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
-      return (
-  <div className="App">
+    return () => clearInterval(interval);
+  }, [isRunning, mode, breakLength, sessionLength]);
 
-    <h1>25 + 5 Clock</h1>
+  const format = (t) => {
+    const m = Math.floor(t / 60);
+    const s = t % 60;
+    return `${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`;
+  };
 
-    <div className="length-container">
+  const reset = () => {
+    setBreakLength(5);
+    setSessionLength(25);
+    setTimeLeft(1500);
+    setIsRunning(false);
+    setMode("Session");
 
-      {/* BREAK */}
-      <div>
-        <h2 id="break-label">Break Length</h2>
-
-        <button id="break-decrement" onClick={() => setBreakLength(p => Math.max(1, p - 1))}>
-          <i className="fas fa-arrow-down"></i>
-        </button>
-
-        <span id="break-length">{breakLength}</span>
-
-        <button id="break-increment" onClick={() => setBreakLength(p => Math.min(60, p + 1))}>
-          <i className="fas fa-arrow-up"></i>
-        </button>
-      </div>
-
-      {/* SESSION */}
-      <div>
-        <h2 id="session-label">Session Length</h2>
-
-        <button id="session-decrement" onClick={() => setSessionLength(p => Math.max(1, p - 1))}>
-          <i className="fas fa-arrow-down"></i>
-        </button>
-
-        <span id="session-length">{sessionLength}</span>
-
-        <button id="session-increment" onClick={() => setSessionLength(p => Math.min(60, p + 1))}>
-          <i className="fas fa-arrow-up"></i>
-        </button>
-      </div>
-
-    </div>
-
-    {/* TIMER */}
-    <div className="timer-box">
-      <h2 id="timer-label">{mode}</h2>
-      <div id="time-left">{format(timeLeft)}</div>
-    </div>
-
-    {/* CONTROLS */}
-    <div className="controls">
-
-      <button id="start_stop" onClick={() => setIsRunning(!isRunning)}>
-        <i className={isRunning ? "fas fa-pause" : "fas fa-play"}></i>
-      </button>
-
-      <button id="reset" onClick={reset}>
-        <i className="fas fa-sync-alt"></i>
-      </button>
-
-    </div>
-
-    {/* AUDIO */}
-    <audio
-      id="beep"
-      ref={audioRef}
-      src="https://cdn.freecodecamp.org/testable-projects-fcc/audio/BeepSound.wav"
-    />
-
-  </div>
-      );
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
     }
+  };
 
-    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
-  </script>
+  return (
+    <div className="App">
+
+      <h1>25 + 5 Clock</h1>
+
+      <div className="length-container">
+
+        {/* BREAK */}
+        <div>
+          <h2 id="break-label">Break Length</h2>
+
+          <button id="break-decrement" onClick={() => setBreakLength(p => Math.max(1, p - 1))}>
+            <i className="fas fa-arrow-down"></i>
+          </button>
+
+          <span id="break-length">{breakLength}</span>
+
+          <button id="break-increment" onClick={() => setBreakLength(p => Math.min(60, p + 1))}>
+            <i className="fas fa-arrow-up"></i>
+          </button>
+        </div>
+
+        {/* SESSION */}
+        <div>
+          <h2 id="session-label">Session Length</h2>
+
+          <button id="session-decrement" onClick={() => setSessionLength(p => Math.max(1, p - 1))}>
+            <i className="fas fa-arrow-down"></i>
+          </button>
+
+          <span id="session-length">{sessionLength}</span>
+
+          <button id="session-increment" onClick={() => setSessionLength(p => Math.min(60, p + 1))}>
+            <i className="fas fa-arrow-up"></i>
+          </button>
+        </div>
+
+      </div>
+
+      {/* TIMER */}
+      <div className="timer-box">
+        <h2 id="timer-label">{mode}</h2>
+        <div id="time-left">{format(timeLeft)}</div>
+      </div>
+
+      {/* CONTROLS */}
+      <div className="controls">
+
+        <button id="start_stop" onClick={() => setIsRunning(!isRunning)}>
+          <i className={isRunning ? "fas fa-pause" : "fas fa-play"}></i>
+        </button>
+
+        <button id="reset" onClick={reset}>
+          <i className="fas fa-sync-alt"></i>
+        </button>
+
+      </div>
+
+      {/* AUDIO */}
+      <audio
+        id="beep"
+        ref={audioRef}
+        src="https://cdn.freecodecamp.org/testable-projects-fcc/audio/BeepSound.wav"
+      />
+
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);  </script>
 </body>
 </html>
